@@ -1,6 +1,7 @@
 # auth_ui.py
 # -*- coding: utf-8 -*-
 import streamlit as st
+import hmac
 from supabase_client import supabase_anon, supabase_authed
 from bootstrap_db import ensure_user_seeded
 
@@ -12,6 +13,29 @@ def auth_gate():
         st.session_state["user"] = None
 
     if st.session_state["session"] is None:
+        # Acesso temporario da feira: o codigo na URL nao contem a senha.
+        codigo_url = st.query_params.get("feira", "")
+        codigo_config = st.secrets.get("FEIRA_ACCESS_CODE", "")
+        if (isinstance(codigo_url, str) and codigo_url and codigo_config
+                and hmac.compare_digest(codigo_url, str(codigo_config))):
+            try:
+                res = sb.auth.sign_in_with_password({
+                    "email": st.secrets["FEIRA_EMAIL"],
+                    "password": st.secrets["FEIRA_PASSWORD"],
+                })
+                if not res.session or not res.user:
+                    raise RuntimeError("O Supabase nao retornou uma sessao valida.")
+                sb_user = supabase_authed(res.session.access_token)
+                ensure_user_seeded(sb_user, res.user.id)
+                st.session_state["access_token"] = res.session.access_token
+                st.session_state["session"] = res.session
+                st.session_state["user"] = res.user
+                # Remove o codigo do endereco depois do login.
+                st.query_params.clear()
+                st.rerun()
+            except Exception:
+                st.error("Nao foi possivel entrar no modo feira. Verifique a conta e os Secrets.")
+                st.stop()
         st.subheader("Entrar / Criar conta")
         tab_login, tab_signup = st.tabs(["Login", "Criar conta"])
 
