@@ -30,10 +30,7 @@ from catalog_db import (
 # =========================================================
 user_id = auth_gate()
 
-# Identificação da conta demonstrativa
-VISITANTE_UID = "448b25a2-8f23-4813-916e-66aa9166b087"
 
-is_visitante = str(user_id) == VISITANTE_UID
 
 session = st.session_state.get("session")
 access_token = session.access_token if session else None
@@ -115,18 +112,13 @@ def render_sidebar():
     st.sidebar.caption("Suínos — mínimo custo")
     st.sidebar.divider()
 
-    if is_visitante:
-        pages = [
-            ("formular", "🧪 Formular Ração"),
-        ]
-    else:
-        pages = [
-            ("home", "🏠 Início"),
-            ("formular", "🧪 Formular Ração"),
-            ("cadastros", "📚 Cadastros"),
-            ("historico", "📂 Histórico"),
-            ("importar", "⬆️ Importar Planilha"),
-        ]
+    pages = [
+        ("home", "🏠 Início"),
+        ("formular", "🧪 Formular Ração"),
+        ("cadastros", "📚 Cadastros"),
+        ("historico", "📂 Histórico"),
+        ("importar", "⬆️ Importar Planilha"),
+    ]
 
     for key, label in pages:
         is_active = st.session_state["current_page"] == key
@@ -1192,8 +1184,7 @@ def render_resultados():
             if st.button(
                 "💾 Salvar no histórico",
                 key="btn_salvar_historico",
-                use_container_width=True,
-                disabled=is_visitante
+                use_container_width=True
             ):
                 try:
                     meta = save_run(payload, df_res)
@@ -1261,18 +1252,11 @@ def render_formular():
 # =========================================================
 # ROUTER
 # =========================================================
-
-if is_visitante:
-    st.session_state["current_page"] = "formular"
-
 render_sidebar()
 
 page = st.session_state["current_page"]
 
-if is_visitante:
-    render_formular()
-
-elif page == "home":
+if page == "home":
     render_home()
 elif page == "formular":
     render_formular()
