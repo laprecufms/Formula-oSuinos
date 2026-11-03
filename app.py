@@ -30,6 +30,11 @@ from catalog_db import (
 # =========================================================
 user_id = auth_gate()
 
+# Identificação da conta demonstrativa
+VISITANTE_UID = "448b25a2-8f23-4813-916e-66aa9166b087"
+
+is_visitante = str(user_id) == VISITANTE_UID
+
 session = st.session_state.get("session")
 access_token = session.access_token if session else None
 
@@ -110,13 +115,18 @@ def render_sidebar():
     st.sidebar.caption("Suínos — mínimo custo")
     st.sidebar.divider()
 
-    pages = [
-        ("home",       "🏠 Início"),
-        ("formular",   "🧪 Formular Ração"),
-        ("cadastros",  "📚 Cadastros"),
-        ("historico",  "📂 Histórico"),
-        ("importar",   "⬆️ Importar Planilha"),
-    ]
+    if is_visitante:
+        pages = [
+            ("formular", "🧪 Formular Ração"),
+        ]
+    else:
+        pages = [
+            ("home", "🏠 Início"),
+            ("formular", "🧪 Formular Ração"),
+            ("cadastros", "📚 Cadastros"),
+            ("historico", "📂 Histórico"),
+            ("importar", "⬆️ Importar Planilha"),
+        ]
 
     for key, label in pages:
         is_active = st.session_state["current_page"] == key
@@ -1179,7 +1189,12 @@ def render_resultados():
         c1, c2, c3 = st.columns(3)
 
         with c1:
-            if st.button("💾 Salvar no histórico", key="btn_salvar_historico", use_container_width=True):
+            if st.button(
+                "💾 Salvar no histórico",
+                key="btn_salvar_historico",
+                use_container_width=True,
+                disabled=is_visitante
+            ):
                 try:
                     meta = save_run(payload, df_res)
                     st.session_state["last_saved_id"] = meta.get("id", "")
@@ -1246,10 +1261,18 @@ def render_formular():
 # =========================================================
 # ROUTER
 # =========================================================
+
+if is_visitante:
+    st.session_state["current_page"] = "formular"
+
 render_sidebar()
 
 page = st.session_state["current_page"]
-if page == "home":
+
+if is_visitante:
+    render_formular()
+
+elif page == "home":
     render_home()
 elif page == "formular":
     render_formular()
