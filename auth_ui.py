@@ -71,7 +71,6 @@ def auth_gate():
         st.stop()
 
     user = st.session_state["user"]
-    st.caption(f"Logado como: {user.email}")
 
     if st.button("Sair", key="btn_logout"):
         try:

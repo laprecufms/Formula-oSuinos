@@ -130,7 +130,6 @@ def render_sidebar():
             st.rerun()
 
     st.sidebar.divider()
-    st.sidebar.caption(f"👤 {st.session_state.get('user').email if st.session_state.get('user') else ''}")
 
 
 # =========================================================
