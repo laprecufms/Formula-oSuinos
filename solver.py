@@ -246,11 +246,15 @@ def get_reduced_costs_manual(prob, df_food_sel: pd.DataFrame, x_vars: dict, req_
             s += dual.get("EE_max", 0.0) * a_ij
 
         rc = c_j - s
+        rc_kg = rc * 100.0                      # R$/kg do ingrediente
+        preco = nutr(nome, "Preco")
 
         rows.append({
             "Ingrediente": nome,
             "Inclusao_%": float(var.varValue or 0.0),
-            "Reduced_Cost": rc,
+            "Preco_R$/kg": preco,
+            "Reduced_Cost_R$/kg": round(rc_kg, 4),
+            "Preco_para_entrar": round(preco - rc_kg, 4),
         })
 
     df = pd.DataFrame(rows)
