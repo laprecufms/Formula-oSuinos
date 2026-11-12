@@ -261,6 +261,5 @@ def get_reduced_costs_manual(prob, df_food_sel: pd.DataFrame, x_vars: dict, req_
 
     # Deixa mais legível: ordena pelos que estão fora da solução e mais “perto” de entrar
     df["Usado?"] = df["Inclusao_%"] > 1e-6
-    df = df.sort_values(["Usado?", "Reduced_Cost"], ascending=[False, True]).reset_index(drop=True)
-
+    df = df.sort_values(["Usado?", "Reduced_Cost_R$/kg"], ascending=[False, True]).reset_index(drop=True)
     return df
